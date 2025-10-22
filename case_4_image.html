@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Простой слайдер изображений</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(45deg, #6a11cb, #2575fc);
+        }
+
+        .slider-container {
+            position: relative;
+            width: 800px;
+            height: 500px;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+        }
+
+        .slider {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+            height: 100%;
+            width: 100%;
+        }
+
+        .slide {
+            min-width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            background: #fff;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #2575fc;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #2575fc;
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .counter {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            color: #2575fc;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #2575fc;
+            font-weight: 600;
+            z-index: 5;
+        }
+    </style>
+</head>
+<body>
+    <div class="slider-container">
+        <div class="slider">
+            <!-- ПРЯМЫЕ ССЫЛКИ НА ИЗОБРАЖЕНИЯ -->
+            <img src="https://i.ibb.co/fVHQcyvn/image.jpg" class="slide" alt="Изображение 1">
+            <img src="https://i.ibb.co/7JL035hv/image.jpg" class="slide" alt="Изображение 2">
+            <img src="https://i.ibb.co/FZwQ4Dt/image.jpg" class="slide" alt="Изображение 3">
+            <img src="https://i.ibb.co/ZRxh7PHn/image.jpg" class="slide" alt="Изображение 4">
+            <img src="https://i.ibb.co/x8gSN5gB/image.jpg" class="slide" alt="Изображение 5">
+        </div>
+        
+        <div class="counter" id="counter">Изображение 1 из 5</div>
+        
+        <div class="controls">
+            <button class="btn prev">Назад</button>
+            <button class="btn next">Вперед</button>
+        </div>
+
+        <div class="loading" id="loading">Загрузка изображений...</div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const slider = document.querySelector('.slider');
+            const slides = document.querySelectorAll('.slide');
+            const prevBtn = document.querySelector('.prev');
+            const nextBtn = document.querySelector('.next');
+            const counter = document.getElementById('counter');
+            const loading = document.getElementById('loading');
+            
+            let currentIndex = 0;
+            const totalSlides = slides.length;
+
+            // Проверяем загрузку всех изображений
+            function checkImagesLoaded() {
+                let loadedCount = 0;
+                
+                slides.forEach(slide => {
+                    if (slide.complete && slide.naturalHeight !== 0) {
+                        loadedCount++;
+                    } else {
+                        slide.addEventListener('load', () => {
+                            loadedCount++;
+                            if (loadedCount === totalSlides) {
+                                loading.style.display = 'none';
+                            }
+                        });
+                        slide.addEventListener('error', () => {
+                            console.error('Ошибка загрузки изображения:', slide.src);
+                            loadedCount++;
+                            if (loadedCount === totalSlides) {
+                                loading.style.display = 'none';
+                            }
+                        });
+                    }
+                });
+                
+                // Если все уже загружены
+                if (loadedCount === totalSlides) {
+                    loading.style.display = 'none';
+                }
+            }
+
+            function updateSlider() {
+                slider.style.transform = `translateX(-${currentIndex * 100}%)`;
+                counter.textContent = `Изображение ${currentIndex + 1} из ${totalSlides}`;
+            }
+
+            function nextSlide() {
+                currentIndex = (currentIndex + 1) % totalSlides;
+                updateSlider();
+            }
+
+            function prevSlide() {
+                currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
+                updateSlider();
+            }
+
+            // Инициализация слайдера
+            checkImagesLoaded();
+            updateSlider();
+            
+            nextBtn.addEventListener('click', nextSlide);
+            prevBtn.addEventListener('click', prevSlide);
+
+            // Управление с клавиатуры
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight') nextSlide();
+                if (e.key === 'ArrowLeft') prevSlide();
+            });
+        });
+    </script>
+</body>
+</html>
